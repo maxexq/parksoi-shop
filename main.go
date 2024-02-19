@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/maxexq/parksoi-shop/config"
+	"github.com/maxexq/parksoi-shop/pkg/databases"
 )
 
 func envPath() string {
@@ -17,5 +18,8 @@ func envPath() string {
 
 func main() {
 	cfg := config.LoadConfig(envPath())
-	fmt.Println(cfg.App())
+	db := databases.DbConnect(cfg.Db())
+	defer db.Close()
+
+	fmt.Println(db)
 }
