@@ -3,6 +3,7 @@ package monitorHandlers
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/maxexq/parksoi-shop/config"
+	"github.com/maxexq/parksoi-shop/modules/entities"
 	"github.com/maxexq/parksoi-shop/modules/monitor"
 )
 
@@ -26,5 +27,6 @@ func (h *monitorHandler) HealthCheck(c *fiber.Ctx) error {
 		Version: h.cfg.App().Version(),
 	}
 
-	return c.Status(fiber.StatusOK).JSON(res)
+	// return c.Status(fiber.StatusOK).JSON(res)
+	return entities.NewResponse(c).Success(fiber.StatusOK, res).Res()
 }
