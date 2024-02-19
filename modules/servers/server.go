@@ -37,6 +37,14 @@ func NewServer(cfg config.IConfig, db *sqlx.DB) IServer {
 }
 
 func (s *server) Start() {
+	// Middlewares
+
+	// Module
+	v1 := s.app.Group("/api/v1")
+	module := InitModule(v1, s)
+
+	module.MonitorModule()
+
 	// Graceful Shutdown
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
