@@ -48,6 +48,8 @@ func (s *server) Start() {
 
 	module.MonitorModule()
 
+	module.UsersModule()
+
 	s.app.Use(middlewares.RouterCheck())
 
 	// Graceful Shutdown
