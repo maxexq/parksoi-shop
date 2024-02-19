@@ -16,7 +16,7 @@ type ILogger interface {
 	Save()
 	SetQuery(c *fiber.Ctx)
 	SetBody(c *fiber.Ctx)
-	SetResponse(c *fiber.Ctx)
+	SetResponse(res any)
 }
 
 type Logger struct {
@@ -41,7 +41,7 @@ func InitLogger(c *fiber.Ctx, res any) ILogger {
 
 	log.SetQuery(c)
 	log.SetBody(c)
-	log.SetResponse(c)
+	log.SetResponse(res)
 	return log
 }
 
@@ -68,7 +68,13 @@ func (l *Logger) Save() {
 }
 
 func (l *Logger) SetQuery(c *fiber.Ctx) {
+	var body any
 
+	if err := c.QueryParser(&body); err != nil {
+		log.Printf("parse query failed: %v", err)
+	}
+
+	l.Query = body
 }
 
 func (l *Logger) SetBody(c *fiber.Ctx) {
@@ -87,6 +93,6 @@ func (l *Logger) SetBody(c *fiber.Ctx) {
 
 }
 
-func (l *Logger) SetResponse(c *fiber.Ctx) {
-
+func (l *Logger) SetResponse(res any) {
+	l.Response = res
 }
