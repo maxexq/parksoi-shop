@@ -3,6 +3,7 @@ package middlewaresHandlers
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/maxexq/parksoi-shop/config"
 	"github.com/maxexq/parksoi-shop/modules/entities"
 	"github.com/maxexq/parksoi-shop/modules/middlewares/middlewaresUsecases"
@@ -11,6 +12,7 @@ import (
 type IMiddlewaresHandler interface {
 	Cors() fiber.Handler
 	RouterCheck() fiber.Handler
+	Logger() fiber.Handler
 }
 
 type middlewareHandlerErrCode string
@@ -47,4 +49,12 @@ func (h *middlewaresHandler) RouterCheck() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		return entities.NewResponse(c).Error(fiber.ErrNotFound.Code, string(routerCheckErr), "Router not found").Res()
 	}
+}
+
+func (h *middlewaresHandler) Logger() fiber.Handler {
+	return logger.New(logger.Config{
+		Format:     "${time} [${ip}] ${status} - ${method} ${path}\n",
+		TimeFormat: "01/02/2006",
+		TimeZone:   "Bangkok/Asia",
+	})
 }

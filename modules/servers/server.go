@@ -40,6 +40,7 @@ func (s *server) Start() {
 	// Middlewares
 	middlewares := InitMiddleware(s)
 	s.app.Use(middlewares.Cors())
+	s.app.Use(middlewares.Logger())
 
 	// Module
 	v1 := s.app.Group("/api/v1")
