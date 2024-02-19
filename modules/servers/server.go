@@ -38,10 +38,12 @@ func NewServer(cfg config.IConfig, db *sqlx.DB) IServer {
 
 func (s *server) Start() {
 	// Middlewares
+	middlewares := InitMiddleware(s)
+	s.app.Use(middlewares.Cors())
 
 	// Module
 	v1 := s.app.Group("/api/v1")
-	module := InitModule(v1, s)
+	module := InitModule(v1, s, middlewares)
 
 	module.MonitorModule()
 
