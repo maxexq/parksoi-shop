@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/maxexq/parksoi-shop/config"
+	"github.com/maxexq/parksoi-shop/modules/servers"
 	"github.com/maxexq/parksoi-shop/pkg/databases"
 )
 
@@ -21,5 +21,5 @@ func main() {
 	db := databases.DbConnect(cfg.Db())
 	defer db.Close()
 
-	fmt.Println(db)
+	servers.NewServer(cfg, db).Start()
 }
