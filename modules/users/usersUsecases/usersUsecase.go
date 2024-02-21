@@ -13,6 +13,7 @@ import (
 type IUsersUsecase interface {
 	InsertCustomer(req *users.UserRegisterReq) (*users.UserPassport, error)
 	GetPassport(req *users.UserCredential) (*users.UserPassport, error)
+	RefreshPassport(req *users.UserRefreshCredential) (*users.UserPassport, error)
 }
 
 type usersUsecase struct {
