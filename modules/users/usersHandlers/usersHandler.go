@@ -10,12 +10,19 @@ import (
 
 type IUsersHandler interface {
 	SignUpCustomer(c *fiber.Ctx) error
+	SignIn(c *fiber.Ctx) error
 }
 
 type userHandlersErrCode string
 
 const (
-	signUpCustomerErr userHandlersErrCode = "Sign up customer error"
+	signUpCustomerErr     userHandlersErrCode = "users-001"
+	signInErr             userHandlersErrCode = "users-002"
+	refreshPassportErr    userHandlersErrCode = "users-003"
+	signOutErr            userHandlersErrCode = "users-004"
+	signUpAdminErr        userHandlersErrCode = "users-005"
+	generateAdminTokenErr userHandlersErrCode = "users-006"
+	getUserProfileErr     userHandlersErrCode = "users-007"
 )
 
 type usersHandler struct {
@@ -76,4 +83,26 @@ func (h *usersHandler) SignUpCustomer(c *fiber.Ctx) error {
 	}
 
 	return entities.NewResponse(c).Success(fiber.StatusCreated, result).Res()
+}
+
+func (h *usersHandler) SignIn(c *fiber.Ctx) error {
+	req := new(users.UserCredential)
+	if err := c.BodyParser(req); err != nil {
+		return entities.NewResponse(c).Error(
+			fiber.ErrBadRequest.Code,
+			string(signInErr),
+			err.Error(),
+		).Res()
+	}
+
+	passport, err := h.usersUsecase.GetPassport(req)
+	if err != nil {
+		return entities.NewResponse(c).Error(
+			fiber.ErrBadRequest.Code,
+			string(signInErr),
+			err.Error(),
+		).Res()
+	}
+
+	return entities.NewResponse(c).Success(fiber.StatusOK, passport).Res()
 }
