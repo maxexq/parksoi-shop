@@ -1,18 +1,30 @@
 package middlewaresUsecases
 
-import (
-	middlewaresrepositories "github.com/maxexq/parksoi-shop/modules/middlewares/middlewaresRepositories"
-)
+import "github.com/maxexq/parksoi-shop/modules/middlewares/middlewaresRepositories"
 
-type IMiddlewaresUsecases interface {
+type IMiddlewaresUsecase interface {
+	FindAccessToken(userId, accessToken string) bool
+	// FindRole() ([]*middlewares.Role, error)
 }
 
-type middlewaresUsecases struct {
-	middlewaresrepository middlewaresrepositories.IMiddlewaresrepositories
+type middlewaresUsecase struct {
+	middlewaresRepository middlewaresRepositories.IMiddlewaresRepository
 }
 
-func MiddlewaresRepository(middlewaresrepository middlewaresrepositories.IMiddlewaresrepositories) IMiddlewaresUsecases {
-	return &middlewaresUsecases{
-		middlewaresrepository: middlewaresrepository,
+func MiddlewaresUsecase(middlewaresRepository middlewaresRepositories.IMiddlewaresRepository) IMiddlewaresUsecase {
+	return &middlewaresUsecase{
+		middlewaresRepository: middlewaresRepository,
 	}
 }
+
+func (u *middlewaresUsecase) FindAccessToken(userId, accessToken string) bool {
+	return u.middlewaresRepository.FindAccessToken(userId, accessToken)
+}
+
+// func (u *middlewaresUsecase) FindRole() ([]*middlewares.Role, error) {
+// 	roles, err := u.middlewaresRepository.FindRole()
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return roles, nil
+// }

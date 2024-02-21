@@ -31,8 +31,8 @@ func InitModule(r fiber.Router, server *server, mid middlewaresHandlers.IMiddlew
 
 func InitMiddleware(s *server) middlewaresHandlers.IMiddlewaresHandler {
 	repository := middlewaresrepositories.MiddlewaresRepository(s.db)
-	usecase := middlewaresUsecases.MiddlewaresRepository(repository)
-	return middlewaresHandlers.MiddlewaresHandlers(s.cfg, usecase)
+	usecase := middlewaresUsecases.MiddlewaresUsecase(repository)
+	return middlewaresHandlers.MiddlewaresHandler(s.cfg, usecase)
 
 }
 
@@ -51,4 +51,6 @@ func (m *ModuleFactory) UsersModule() {
 	router.Post("/signin", handler.SignIn)
 	router.Post("/refresh", handler.RefreshPassport)
 	router.Post("/signout", handler.SignOut)
+	router.Post("/signup-admin", handler.SignUpAdmin)
+	router.Get("/secret", m.mid.JwtAuth(), handler.GenerateAdminToken)
 }

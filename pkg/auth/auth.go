@@ -156,7 +156,7 @@ func RepeatToken(cfg config.IJwtConfig, claims *users.UserClaims, exp int64) str
 			RegisteredClaims: jwt.RegisteredClaims{
 				Issuer:    "shop-api",
 				Subject:   "refresh-token",
-				Audience:  []string{"customer", "parksoiAdmin"},
+				Audience:  []string{"customer", "admin"},
 				ExpiresAt: jwtTimeRepeatAdapter(exp),
 				NotBefore: jwt.NewNumericDate(time.Now()),
 				IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -189,7 +189,7 @@ func newAccessToken(cfg config.IJwtConfig, claims *users.UserClaims) IParksoiAut
 			RegisteredClaims: jwt.RegisteredClaims{
 				Issuer:    "shop-api",
 				Subject:   "access-token",
-				Audience:  []string{"customer", "parksoiAdmin"},
+				Audience:  []string{"customer", "admin"},
 				ExpiresAt: jwtTimeDurationCal(cfg.AccessExpiresAt()),
 				NotBefore: jwt.NewNumericDate(time.Now()),
 				IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -206,7 +206,7 @@ func newRefreshToken(cfg config.IJwtConfig, claims *users.UserClaims) IParksoiAu
 			RegisteredClaims: jwt.RegisteredClaims{
 				Issuer:    "shop-api",
 				Subject:   "refresh-token",
-				Audience:  []string{"customer", "parksoiAdmin"},
+				Audience:  []string{"customer", "admin"},
 				ExpiresAt: jwtTimeDurationCal(cfg.RefreshExpiresAt()),
 				NotBefore: jwt.NewNumericDate(time.Now()),
 				IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -224,7 +224,7 @@ func newAdminToken(cfg config.IJwtConfig) IParksoiAuth {
 				RegisteredClaims: jwt.RegisteredClaims{
 					Issuer:    "shop-api",
 					Subject:   "parksoiAdmin-token",
-					Audience:  []string{"parksoiAdmin"},
+					Audience:  []string{"admin"},
 					ExpiresAt: jwtTimeDurationCal(300),
 					NotBefore: jwt.NewNumericDate(time.Now()),
 					IssuedAt:  jwt.NewNumericDate(time.Now()),
