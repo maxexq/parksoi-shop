@@ -68,7 +68,7 @@ func (u *usersUsecase) GetPassport(req *users.UserCredential) (*users.UserPasspo
 
 	// Compare password
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		return nil, fmt.Errorf("password is invalid")
+		return nil, fmt.Errorf("email or password is invalid")
 	}
 
 	// Sign token

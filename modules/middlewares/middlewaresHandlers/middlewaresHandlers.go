@@ -10,6 +10,7 @@ import (
 	"github.com/maxexq/parksoi-shop/modules/entities"
 	"github.com/maxexq/parksoi-shop/modules/middlewares/middlewaresUsecases"
 	"github.com/maxexq/parksoi-shop/pkg/auth"
+	"github.com/maxexq/parksoi-shop/pkg/utils"
 )
 
 type middlewareHandlersErrCode string
@@ -27,8 +28,8 @@ type IMiddlewaresHandler interface {
 	RouterCheck() fiber.Handler
 	Logger() fiber.Handler
 	JwtAuth() fiber.Handler
-	// ParamsCheck() fiber.Handler
-	// Authorize(expectRoleId ...int) fiber.Handler
+	ParamsCheck() fiber.Handler
+	Authorize(expectRoleId ...int) fiber.Handler
 	ApiKeyAuth() fiber.Handler
 	// StreamingFile() fiber.Handler
 }
@@ -103,66 +104,66 @@ func (h *middlewaresHandler) JwtAuth() fiber.Handler {
 	}
 }
 
-// func (h *middlewaresHandler) ParamsCheck() fiber.Handler {
-// 	return func(c *fiber.Ctx) error {
-// 		userId := c.Locals("userId")
-// 		if c.Locals("userRoleId").(int) == 2 {
-// 			return c.Next()
-// 		}
-// 		if c.Params("user_id") != userId {
-// 			return entities.NewResponse(c).Error(
-// 				fiber.ErrUnauthorized.Code,
-// 				string(paramsCheckErr),
-// 				"never gonna give you up",
-// 			).Res()
-// 		}
-// 		return c.Next()
-// 	}
-// }
+func (h *middlewaresHandler) ParamsCheck() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		userId := c.Locals("userId")
+		if c.Locals("userRoleId").(int) == 2 {
+			return c.Next()
+		}
+		if c.Params("user_id") != userId {
+			return entities.NewResponse(c).Error(
+				fiber.ErrUnauthorized.Code,
+				string(paramsCheckErr),
+				"never gonna give you up",
+			).Res()
+		}
+		return c.Next()
+	}
+}
 
-// func (h *middlewaresHandler) Authorize(expectRoleId ...int) fiber.Handler {
-// 	return func(c *fiber.Ctx) error {
-// 		userRoleId, ok := c.Locals("userRoleId").(int)
-// 		if !ok {
-// 			return entities.NewResponse(c).Error(
-// 				fiber.ErrUnauthorized.Code,
-// 				string(authorizeErr),
-// 				"user_id is not int type",
-// 			).Res()
-// 		}
+func (h *middlewaresHandler) Authorize(expectRoleId ...int) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		userRoleId, ok := c.Locals("userRoleId").(int)
+		if !ok {
+			return entities.NewResponse(c).Error(
+				fiber.ErrUnauthorized.Code,
+				string(authorizeErr),
+				"user_id is not int type",
+			).Res()
+		}
 
-// 		roles, err := h.middlewaresUsecase.FindRole()
-// 		if err != nil {
-// 			return entities.NewResponse(c).Error(
-// 				fiber.ErrInternalServerError.Code,
-// 				string(authorizeErr),
-// 				err.Error(),
-// 			).Res()
-// 		}
+		roles, err := h.middlewaresUsecase.FindRole()
+		if err != nil {
+			return entities.NewResponse(c).Error(
+				fiber.ErrInternalServerError.Code,
+				string(authorizeErr),
+				err.Error(),
+			).Res()
+		}
 
-// 		// sum := 0
-// 		// for _, v := range expectRoleId {
-// 		// 	sum += v
-// 		// }
+		sum := 0
+		for _, v := range expectRoleId {
+			sum += v
+		}
 
-// 		// expectedValueBinary := utils.BinaryConverter(sum, len(roles))
-// 		// userValueBinary := utils.BinaryConverter(userRoleId, len(roles))
+		expectedValueBinary := utils.BinaryConverter(sum, len(roles))
+		userValueBinary := utils.BinaryConverter(userRoleId, len(roles))
 
-// 		// user ->     0 1 0
-// 		// expected -> 1 1 0
+		// user ->     0 1 0
+		// expected -> 1 1 0
 
-// 		// for i := range userValueBinary {
-// 		// 	if userValueBinary[i]&expectedValueBinary[i] == 1 {
-// 		// 		return c.Next()
-// 		// 	}
-// 		// }
-// 		return entities.NewResponse(c).Error(
-// 			fiber.ErrUnauthorized.Code,
-// 			string(authorizeErr),
-// 			"no permission to access",
-// 		).Res()
-// 	}
-// }
+		for i := range userValueBinary {
+			if userValueBinary[i]&expectedValueBinary[i] == 1 {
+				return c.Next()
+			}
+		}
+		return entities.NewResponse(c).Error(
+			fiber.ErrUnauthorized.Code,
+			string(authorizeErr),
+			"no permission to access",
+		).Res()
+	}
+}
 
 func (h *middlewaresHandler) ApiKeyAuth() fiber.Handler {
 	return func(c *fiber.Ctx) error {

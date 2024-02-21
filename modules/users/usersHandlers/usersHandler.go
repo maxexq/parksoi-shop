@@ -1,6 +1,8 @@
 package usersHandlers
 
 import (
+	"strings"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/maxexq/parksoi-shop/config"
 	"github.com/maxexq/parksoi-shop/modules/entities"
@@ -16,6 +18,7 @@ type IUsersHandler interface {
 	SignIn(c *fiber.Ctx) error
 	RefreshPassport(c *fiber.Ctx) error
 	SignOut(c *fiber.Ctx) error
+	GetUserProfile(c *fiber.Ctx) error
 }
 
 type userHandlersErrCode string
@@ -224,4 +227,30 @@ func (h *usersHandler) SignOut(c *fiber.Ctx) error {
 	}
 
 	return entities.NewResponse(c).Success(fiber.StatusOK, nil).Res()
+}
+
+func (h *usersHandler) GetUserProfile(c *fiber.Ctx) error {
+	// Set params
+	userId := strings.Trim(c.Params("user_id"), " ")
+
+	// Get profile
+	result, err := h.usersUsecase.GetUserProfile(userId)
+	if err != nil {
+		switch err.Error() {
+		case "get user failed: sql: no rows in result set":
+			return entities.NewResponse(c).Error(
+				fiber.ErrBadRequest.Code,
+				string(getUserProfileErr),
+				err.Error(),
+			).Res()
+		default:
+			return entities.NewResponse(c).Error(
+				fiber.ErrInternalServerError.Code,
+				string(getUserProfileErr),
+				err.Error(),
+			).Res()
+		}
+	}
+
+	return entities.NewResponse(c).Success(fiber.StatusOK, result).Res()
 }
