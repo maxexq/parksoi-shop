@@ -2,6 +2,9 @@ package servers
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/maxexq/parksoi-shop/modules/appinfo/appinfoHandler"
+	"github.com/maxexq/parksoi-shop/modules/appinfo/appinfoRepository"
+	"github.com/maxexq/parksoi-shop/modules/appinfo/appinfoUsecase"
 	"github.com/maxexq/parksoi-shop/modules/middlewares/middlewaresHandlers"
 	middlewaresrepositories "github.com/maxexq/parksoi-shop/modules/middlewares/middlewaresRepositories"
 	"github.com/maxexq/parksoi-shop/modules/middlewares/middlewaresUsecases"
@@ -54,4 +57,16 @@ func (m *ModuleFactory) UsersModule() {
 	router.Post("/signup-admin", handler.SignUpAdmin)
 	router.Get("/admin/secret", m.mid.JwtAuth(), m.mid.Authorize(2), handler.GenerateAdminToken)
 	router.Get("/:user_id", m.mid.JwtAuth(), m.mid.ParamsCheck(), handler.GetUserProfile)
+}
+
+func (m *ModuleFactory) AppinfoModule() {
+	repository := appinfoRepository.AppinfoRepository(m.server.db)
+	usecase := appinfoUsecase.AppinfoUsecase(repository)
+	handler := appinfoHandler.AppinfoHandler(m.server.cfg, usecase)
+
+	router := m.router.Group("/appinfo")
+
+	_ = router
+	_ = handler
+
 }
