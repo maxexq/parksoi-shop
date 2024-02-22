@@ -11,6 +11,9 @@ import (
 	middlewaresrepositories "github.com/maxexq/parksoi-shop/modules/middlewares/middlewaresRepositories"
 	"github.com/maxexq/parksoi-shop/modules/middlewares/middlewaresUsecases"
 	monitorHandlers "github.com/maxexq/parksoi-shop/modules/monitor/handlers"
+	"github.com/maxexq/parksoi-shop/modules/products/productsHandlers"
+	"github.com/maxexq/parksoi-shop/modules/products/productsRepositories"
+	"github.com/maxexq/parksoi-shop/modules/products/productsUsecases"
 	"github.com/maxexq/parksoi-shop/modules/users/usersHandlers"
 	"github.com/maxexq/parksoi-shop/modules/users/usersRepositories"
 	"github.com/maxexq/parksoi-shop/modules/users/usersUsecases"
@@ -82,4 +85,18 @@ func (m *ModuleFactory) FilesModule() {
 
 	router.Post("/upload", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UploadFiles)
 	router.Patch("/delete", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteFile)
+}
+
+func (m *ModuleFactory) ProductsModule() {
+
+	filesUsecase := filesUsecases.FileUsecase(m.server.cfg)
+
+	repository := productsRepositories.ProductsRepository(m.server.db, m.server.cfg, filesUsecase)
+	usecase := productsUsecases.ProductsUsecase(repository)
+	handler := productsHandlers.ProductsHandler(m.server.cfg, usecase, filesUsecase)
+
+	router := m.router.Group("/products")
+
+	router.Get("/:product_id", m.mid.ApiKeyAuth(), handler.FindOneProduct)
+	router.Get("/", m.mid.ApiKeyAuth(), handler.FindProduct)
 }
