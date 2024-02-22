@@ -5,6 +5,8 @@ import (
 	"github.com/maxexq/parksoi-shop/modules/appinfo/appinfoHandler"
 	"github.com/maxexq/parksoi-shop/modules/appinfo/appinfoRepository"
 	"github.com/maxexq/parksoi-shop/modules/appinfo/appinfoUsecase"
+	"github.com/maxexq/parksoi-shop/modules/files/filesHandlers"
+	"github.com/maxexq/parksoi-shop/modules/files/filesUsecases"
 	"github.com/maxexq/parksoi-shop/modules/middlewares/middlewaresHandlers"
 	middlewaresrepositories "github.com/maxexq/parksoi-shop/modules/middlewares/middlewaresRepositories"
 	"github.com/maxexq/parksoi-shop/modules/middlewares/middlewaresUsecases"
@@ -50,10 +52,10 @@ func (m *ModuleFactory) UsersModule() {
 	handler := usersHandlers.UsersHandler(m.server.cfg, usecase)
 
 	router := m.router.Group("/users")
-	router.Post("/signup", handler.SignUpCustomer)
-	router.Post("/signin", handler.SignIn)
-	router.Post("/refresh", handler.RefreshPassport)
-	router.Post("/signout", handler.SignOut)
+	router.Post("/signup", m.mid.ApiKeyAuth(), handler.SignUpCustomer)
+	router.Post("/signin", m.mid.ApiKeyAuth(), handler.SignIn)
+	router.Post("/refresh", m.mid.ApiKeyAuth(), handler.RefreshPassport)
+	router.Post("/signout", m.mid.ApiKeyAuth(), handler.SignOut)
 	router.Post("/signup-admin", handler.SignUpAdmin)
 	router.Get("/admin/secret", m.mid.JwtAuth(), m.mid.Authorize(2), handler.GenerateAdminToken)
 	router.Get("/:user_id", m.mid.JwtAuth(), m.mid.ParamsCheck(), handler.GetUserProfile)
@@ -66,7 +68,18 @@ func (m *ModuleFactory) AppinfoModule() {
 
 	router := m.router.Group("/appinfo")
 
-	_ = router
-	_ = handler
+	router.Post("/categories", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddCategory)
+	router.Delete("/:category_id/categories", m.mid.JwtAuth(), m.mid.Authorize(2), handler.RemoveCategory)
+	router.Get("/categories", m.mid.ApiKeyAuth(), handler.FindCategory)
+	router.Get("/apikey", m.mid.JwtAuth(), m.mid.Authorize(2), handler.GenerateApiKey)
+}
 
+func (m *ModuleFactory) FilesModule() {
+	usecase := filesUsecases.FileUsecase(m.server.cfg)
+	handler := filesHandlers.FileHandler(m.server.cfg, usecase)
+
+	router := m.router.Group("/files")
+
+	router.Post("/upload", m.mid.JwtAuth(), m.mid.Authorize(2), handler.UploadFiles)
+	router.Patch("/delete", m.mid.JwtAuth(), m.mid.Authorize(2), handler.DeleteFile)
 }
