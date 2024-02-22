@@ -14,7 +14,7 @@ type Product struct {
 	Images      []*entities.Image `json:"images"`
 
 	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"uploaded_at"`
+	UpdatedAt string `json:"updated_at"`
 }
 
 type ProductFilter struct {

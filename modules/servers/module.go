@@ -88,7 +88,6 @@ func (m *ModuleFactory) FilesModule() {
 }
 
 func (m *ModuleFactory) ProductsModule() {
-
 	filesUsecase := filesUsecases.FileUsecase(m.server.cfg)
 
 	repository := productsRepositories.ProductsRepository(m.server.db, m.server.cfg, filesUsecase)
@@ -97,6 +96,8 @@ func (m *ModuleFactory) ProductsModule() {
 
 	router := m.router.Group("/products")
 
+	router.Post("/", m.mid.JwtAuth(), m.mid.Authorize(2), handler.AddProduct)
 	router.Get("/:product_id", m.mid.ApiKeyAuth(), handler.FindOneProduct)
+	router.Patch("/:product_id", m.mid.ApiKeyAuth(), handler.UpdateProduct)
 	router.Get("/", m.mid.ApiKeyAuth(), handler.FindProduct)
 }
