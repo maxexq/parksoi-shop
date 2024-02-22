@@ -1,12 +1,14 @@
 package productsHandlers
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/maxexq/parksoi-shop/config"
 	"github.com/maxexq/parksoi-shop/modules/appinfo"
 	"github.com/maxexq/parksoi-shop/modules/entities"
+	"github.com/maxexq/parksoi-shop/modules/files"
 	"github.com/maxexq/parksoi-shop/modules/files/filesUsecases"
 	"github.com/maxexq/parksoi-shop/modules/products"
 	"github.com/maxexq/parksoi-shop/modules/products/productsUsecases"
@@ -17,6 +19,7 @@ type IProductsHandler interface {
 	FindProduct(c *fiber.Ctx) error
 	AddProduct(c *fiber.Ctx) error
 	UpdateProduct(c *fiber.Ctx) error
+	DeleteProduct(c *fiber.Ctx) error
 }
 
 type productsHandler struct {
@@ -154,4 +157,40 @@ func (h *productsHandler) UpdateProduct(c *fiber.Ctx) error {
 	}
 
 	return entities.NewResponse(c).Success(fiber.StatusOK, product).Res()
+}
+
+func (h *productsHandler) DeleteProduct(c *fiber.Ctx) error {
+	productId := strings.Trim(c.Params("product_id"), " ")
+	product, err := h.productsUsecase.FindOneProduct(productId)
+	if err != nil {
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			string(deleteProductErr),
+			err.Error(),
+		).Res()
+	}
+
+	deleteFileReq := make([]*files.DeleteFileReq, 0)
+
+	for _, p := range product.Images {
+		deleteFileReq = append(deleteFileReq, &files.DeleteFileReq{
+			Destination: fmt.Sprintf("images/products/%s", p.FileName),
+		})
+	}
+	if err := h.filesUsecase.DeleteFileOnGCP(deleteFileReq); err != nil {
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			string(deleteProductErr),
+			err.Error(),
+		).Res()
+	}
+	if err := h.productsUsecase.DeleteProduct(productId); err != nil {
+		return entities.NewResponse(c).Error(
+			fiber.ErrInternalServerError.Code,
+			string(deleteProductErr),
+			err.Error(),
+		).Res()
+	}
+
+	return entities.NewResponse(c).Success(fiber.StatusNoContent, nil).Res()
 }
